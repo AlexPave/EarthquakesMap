@@ -9,8 +9,13 @@ import Parsing.ParseFeed;
 
 //unfolding libraries
 import de.fhpotsdam.unfolding.UnfoldingMap;
+import de.fhpotsdam.unfolding.data.Feature;
+import de.fhpotsdam.unfolding.data.GeoJSONReader;
 import de.fhpotsdam.unfolding.data.PointFeature;
+import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
+import de.fhpotsdam.unfolding.marker.MultiMarker;
 import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 import de.fhpotsdam.unfolding.utils.MapUtils;
@@ -25,6 +30,15 @@ public class EarthquakeMap extends PApplet {
 	//URL for the earthquakes
 	private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom";
 	
+	//files with city and country names and info
+	private String cityFile = "C:/Users/Anda/git/EarthquakesMap/data/city-data.json";
+	private String countryFile = "C:/Users/Anda/git/EarthquakesMap/data/countries.geo.json";
+
+	//marker lists for cities, countries and earthquakes
+	private List<Marker> quakeMarkers;
+	private List<Marker> cityMarkers;
+	private List<Marker> countryMarkers;
+	
 	public void setup() {
 		//setting the size of the Applet
 		size(950, 600, OPENGL);
@@ -34,18 +48,33 @@ public class EarthquakeMap extends PApplet {
 		
 		MapUtils.createDefaultEventDispatcher(this, map);
 		
-		List<Marker> markers = new ArrayList<Marker>();
+		//loading country features and markers
+	    List<Feature> countries = GeoJSONReader.loadData(this, countryFile);
+		countryMarkers = MapUtils.createSimpleMarkers(countries);
 		
-		//taking the characteristics of the earthquakes from the site
-	    List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
+		//loading city data
+		List<Feature> cities = GeoJSONReader.loadData(this, cityFile);
+		cityMarkers = new ArrayList<Marker>();
+		for(Feature city : cities) {
+		  cityMarkers.add(new CityMarker(city));
+		}
+		
+		//reading earthquakes from RSS feed
+		List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
+	    quakeMarkers = new ArrayList<Marker>();
 	    
-	    //creating the markers
-	    for(PointFeature feature: earthquakes) {
-	    	markers.add(createMarker(feature));
+	    //check if LandQuake or OceanQuake
+	    for(PointFeature feature : earthquakes) {
+		  if(isLand(feature)) {
+		    quakeMarkers.add(new LandQuakeMarker(feature));
+		  }
+		  else {
+		    quakeMarkers.add(new OceanQuakeMarker(feature));
+		  }
 	    }
-	    
 	    //adding the markers to the map
-	    map.addMarkers(markers);
+	    map.addMarkers(quakeMarkers);
+	    map.addMarkers(cityMarkers);
 	}
 	
 	public void draw() {
@@ -55,35 +84,6 @@ public class EarthquakeMap extends PApplet {
 		map.draw();
 		//adding the legend
 		addKey();
-	}
-	
-	//helper method for creating the markers using PointFeatures 
-	private SimplePointMarker createMarker(PointFeature feature)
-	{
-		SimplePointMarker mark = new SimplePointMarker(feature.getLocation(), feature.getProperties());
-		
-		//getting the magnitude
-		Object magObj = feature.getProperty("magnitude");
-	   	float mag = Float.parseFloat(magObj.toString());
-	   	
-	   	//creating different markers depending on the magnitude
-		if(mag<4.0) {
-			mark.setRadius(6);
-			mark.setColor(color(20, 179, 219));
-		}
-		else
-		{
-			if (mag<5.0) {
-				mark.setRadius(10);
-				mark.setColor(color(219, 219, 20));
-			}
-			else {
-				mark.setRadius(14);
-				mark.setColor(color(209, 47, 25));
-			}
-		}
-		
-		return mark;
 	}
 	
 	//helper method to create the legend 
@@ -125,6 +125,44 @@ public class EarthquakeMap extends PApplet {
 		
 		textAlign(LEFT, CENTER);
 		text("Size ~ Magnitude", 50, 155);
+	}
+	
+	//checks whether the quake occurred on land
+	private boolean isLand(PointFeature earthquake) {
+		
+		for (Marker m : countryMarkers) {
+			if(isInCountry(earthquake, m)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	//helper method to see if a given quake is in a given country
+	
+	private boolean isInCountry(PointFeature earthquake, Marker country) {
+		Location checkLoc = earthquake.getLocation();
+
+		// some countries represented it as MultiMarker
+		if(country.getClass() == MultiMarker.class) {
+				
+			for(Marker marker : ((MultiMarker)country).getMarkers()) {
+					
+				if(((AbstractShapeMarker)marker).isInsideByLocation(checkLoc)) {
+					earthquake.addProperty("country", country.getProperty("name"));
+						
+					return true;
+				}
+			}
+		}
+			
+		else if(((AbstractShapeMarker)country).isInsideByLocation(checkLoc)) {
+			earthquake.addProperty("country", country.getProperty("name"));
+			
+			return true;
+		}
+		return false;
 	}
 	
 }
