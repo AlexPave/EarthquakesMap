@@ -89,43 +89,42 @@ public class EarthquakeMap extends PApplet {
 	//helper method to create the legend 
 	private void addKey() {
 		
-		fill(204, 255, 204);
-		rect(20, 100, 170, 400, 7);
+		fill(255, 250, 240);
+		rect(25, 50, 150, 250);
 		
-		String s = "Legend";
-		fill(0,0,0);
-		textSize(20);
-		text(s, 30, 110, 140, 400);
-		textAlign(CENTER);
+		fill(0);
+		textAlign(LEFT, CENTER);
+		textSize(12);
+		text("Earthquake Key", 50, 75);
 		
+		fill(color(255, 255, 255));
+		ellipse(50, 95, 15, 15);
+		fill(color(255, 255, 255));
+		rect(43, 110, 15, 15);
+		fill(163,136,60);
+		triangle(50,130,45,140,55,140);
+		fill(color(255, 255, 0));
+		ellipse(50, 175, 15, 15);
+		fill(color(0, 0, 255));
+		ellipse(50, 195, 15, 15);
+		fill(color(255, 0, 0));
+		ellipse(50, 215, 15, 15);
+		fill(color(255, 255, 255));
+		ellipse(50, 235, 15, 15);
+		line(60,225,40,245);
+		line(40,225,60,245);
 		
-		fill(20, 179, 219);
-		ellipse(50, 200, 15, 15);
+		fill(0, 0, 0);
+		text("Land quake", 75, 95);
+		text("Ocean quake", 75, 115);
+		text("Cities", 75, 135);
+		text("Shallow", 75, 175);
+		text("Intermidiate", 75, 195);
+		text("Deep", 75, 215);
+		text("Past Day", 75, 235);
 		
-		s = "Magnitude<4.0";
-		fill(0,0,0);
-		textSize(13);
-		text(s, 55, 190, 140, 400);
-		textAlign(CENTER);
-		
-		
-		fill(219, 219, 20);
-		ellipse(50, 300, 30, 30);
-		
-		s = "Magnitude<5.0";
-		fill(0,0,0);
-		text(s, 55, 290, 140, 400);
-		textAlign(CENTER);
-		textSize(13);
-		
-		fill(209, 47, 25);
-		ellipse(50, 400, 45, 45);
-		
-		s = "Magnitude>5.0";
-		fill(0,0,0);
-		text(s, 55, 390, 140, 400);
-		textAlign(CENTER);
-		textSize(13);
+		textAlign(LEFT, CENTER);
+		text("Size ~ Magnitude", 50, 155);
 	}
 	
 }
