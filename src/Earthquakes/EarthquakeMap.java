@@ -2,11 +2,12 @@ package Earthquakes;
 
 //java util libraries
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //parse feed class
 import Parsing.ParseFeed;
-
 //unfolding libraries
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.data.Feature;
@@ -33,11 +34,22 @@ public class EarthquakeMap extends PApplet {
 	//files with city and country names and info
 	private String cityFile = "C:/Users/Anda/git/EarthquakesMap/data/city-data.json";
 	private String countryFile = "C:/Users/Anda/git/EarthquakesMap/data/countries.geo.json";
+	
+	//map for life expectancy (key=country, value = life expectancy value)
+	private Map<String,Float>  lifeExpByCountry = lifeExpCSVFileLoad("C:/Users/Anda/eclipse-workspace/MyPApplet/data/LifeExpectancyWorldBank.csv");
 
-	//marker lists for cities, countries and earthquakes
+	//marker lists for cities, countries, earthquakes and a helper list to create lines from an ocean quake to the city it affects
 	private List<Marker> quakeMarkers;
 	private List<Marker> cityMarkers;
 	private List<Marker> countryMarkers;
+	private List<Marker> lines;
+	
+	private CommonMarker lastSelected;
+	private CommonMarker lastClicked;
+	
+	//helpers to show which key to show
+	private String lifeMap = "false";
+	private String eqMap = "false";
 	
 	public void setup() {
 		//setting the size of the Applet
@@ -47,6 +59,8 @@ public class EarthquakeMap extends PApplet {
 		map.zoomToLevel(2);
 		
 		MapUtils.createDefaultEventDispatcher(this, map);
+		
+	    lines = new ArrayList<Marker>();
 		
 		//loading country features and markers
 	    List<Feature> countries = GeoJSONReader.loadData(this, countryFile);
@@ -72,9 +86,16 @@ public class EarthquakeMap extends PApplet {
 		    quakeMarkers.add(new OceanQuakeMarker(feature));
 		  }
 	    }
+	    
+	    //setting the markers to be hidden
+	    hideMarkers();
+	    hideCountryMarkers();
 	    //adding the markers to the map
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
+	    map.addMarkers(countryMarkers);
+	    map.addMarkers(lines);
+
 	}
 	
 	public void draw() {
@@ -82,51 +103,177 @@ public class EarthquakeMap extends PApplet {
 		background(10);
 		//adding the map
 		map.draw();
-		//adding the legend
-		addKey();
+		//adding the legend 
+		if(eqMap.equals("false")&&lifeMap.equals("false")) {
+	    	addKey();
+	    }
+	    else {
+	    	if(eqMap.equals("true")) {
+	    		addEqMapKey();
+	    	}
+	    	else {
+	    		addLifeMapKey();
+	    	}
+	    }
 	}
 	
-	//helper method to create the legend 
-	private void addKey() {
+
+	//helper method to create the map for life expectancy
+	private Map<String, Float> lifeExpCSVFileLoad(String filename){
 		
-		fill(255, 250, 240);
-		rect(25, 50, 150, 250);
+		Map <String, Float> lifeExpMap = new HashMap <String, Float>();
+		String[] rows = loadStrings(filename);
 		
-		fill(0);
-		textAlign(LEFT, CENTER);
-		textSize(12);
-		text("Earthquake Key", 50, 75);
+		for(String row: rows) {
+			String[] columns = row.split(",");
+			
+			//println(columns[4]+" "+columns[5]+" "+columns.length);
+	
+			if(columns.length == 18 && !columns[5].equals("..")) {
+				float value = Float.parseFloat(columns[5]);
+				lifeExpMap.put(columns[4], value);
+			}
+		}
+		return lifeExpMap;
+	}
+
+	//shades the countries depending on the life expectancy
+	private void shadeCountries() {
 		
-		fill(color(255, 255, 255));
-		ellipse(50, 95, 15, 15);
-		fill(color(255, 255, 255));
-		rect(43, 110, 15, 15);
-		fill(163,136,60);
-		triangle(50,130,45,140,55,140);
-		fill(color(255, 255, 0));
-		ellipse(50, 175, 15, 15);
-		fill(color(0, 0, 255));
-		ellipse(50, 195, 15, 15);
-		fill(color(255, 0, 0));
-		ellipse(50, 215, 15, 15);
-		fill(color(255, 255, 255));
-		ellipse(50, 235, 15, 15);
-		line(60,225,40,245);
-		line(40,225,60,245);
+		for (Marker m: countryMarkers) {
+			String countryID = m.getId();
+			//println(countryID);
+			if(lifeExpByCountry.containsKey(countryID)) {
+				float lifeExp = lifeExpByCountry.get(countryID);
+				//println(lifeExp);
+				int colorLevel = (int)map(lifeExp, 40, 90, 10, 255);
+				m.setColor(color(255-colorLevel, 100, colorLevel));
+			}
+			else {
+				m.setColor(color(150, 150, 150));
+			}
+		}
 		
-		fill(0, 0, 0);
-		text("Land quake", 75, 95);
-		text("Ocean quake", 75, 115);
-		text("Cities", 75, 135);
-		text("Shallow", 75, 175);
-		text("Intermidiate", 75, 195);
-		text("Deep", 75, 215);
-		text("Past Day", 75, 235);
-		
-		textAlign(LEFT, CENTER);
-		text("Size ~ Magnitude", 50, 155);
 	}
 	
+
+	@Override
+	public void mouseMoved()
+	{
+		// clear the last selection
+		if (lastSelected != null) {
+			lastSelected.setSelected(false);
+			lastSelected = null;
+		
+		}
+		selectMarkerIfHover(quakeMarkers);
+		selectMarkerIfHover(cityMarkers);
+		
+	}
+	
+	private void selectMarkerIfHover(List<Marker> markers)
+	{
+		for(Marker m: markers) {
+			if(m.isInside(map, (float)mouseX, (float)mouseY)){
+				if(lastSelected==null) {
+					lastSelected = (CommonMarker)m;
+					lastSelected.setSelected(true);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void mouseClicked()
+	{
+		// TODO: Implement this method
+		// Hint: You probably want a helper method or two to keep this code
+		// from getting too long/disorganized
+		
+		// clear the last selection
+		if (lastClicked != null) {
+			lastClicked.setClicked(false);
+			lastClicked = null;
+			hideLines();
+			unhideMarkers();
+		}
+		
+		if(mouseX>40&&mouseX<65&&((mouseY>90&&mouseY<105)||(mouseY>130&&mouseY<145))) {
+			eqMap = "true";
+			lifeMap = "false";
+			unhideMarkers();
+			hideCountryMarkers();
+		}
+		else {
+			if(mouseX>40&&mouseX<65&&((mouseY>110&&mouseY<125)||(mouseY>290&&mouseY<315))) {
+				lifeMap = "true";
+				eqMap = "false";
+				hideMarkers();
+				shadeCountries();
+				unhideCountryMarkers();
+			}
+			else {
+				selectMarkerIfClicked(quakeMarkers);
+				selectMarkerIfClicked(cityMarkers);
+				if(lastClicked!=null) {
+					lastClicked.hideNotWithinThreat(quakeMarkers, cityMarkers,lines,map);
+				}
+			}
+		}
+		
+	}
+	
+	private void selectMarkerIfClicked(List<Marker> markers)
+	{
+		for(Marker m: markers) {
+			if(m.isInside(map, (float)mouseX, (float)mouseY)){
+				if(lastClicked==null) {
+					lastClicked = (CommonMarker)m;
+					lastClicked.setClicked(true);
+				}
+			}
+		}
+	}
+	
+	// loop over and unhide all markers
+		private void unhideMarkers() {
+			for(Marker marker : quakeMarkers) {
+				marker.setHidden(false);
+			}
+				
+			for(Marker marker : cityMarkers) {
+				marker.setHidden(false);
+			}
+		}
+		
+		private void hideMarkers() {
+			for(Marker marker : quakeMarkers) {
+				marker.setHidden(true);
+			}
+				
+			for(Marker marker : cityMarkers) {
+				marker.setHidden(true);
+			}
+		}
+		
+		private void hideCountryMarkers() {
+			for(Marker marker : countryMarkers) {
+				marker.setHidden(true);
+			}
+		}
+		
+		private void hideLines() {
+			for(Marker m: lines) {
+				m.setHidden(true);
+			}
+		}
+		
+		private void unhideCountryMarkers() {
+			for(Marker marker : countryMarkers) {
+				marker.setHidden(false);
+			}
+		}
+
 	//checks whether the quake occurred on land
 	private boolean isLand(PointFeature earthquake) {
 		
@@ -140,10 +287,9 @@ public class EarthquakeMap extends PApplet {
 	}
 
 	//helper method to see if a given quake is in a given country
-	
 	private boolean isInCountry(PointFeature earthquake, Marker country) {
 		Location checkLoc = earthquake.getLocation();
-
+	
 		// some countries represented it as MultiMarker
 		if(country.getClass() == MultiMarker.class) {
 				
@@ -164,5 +310,108 @@ public class EarthquakeMap extends PApplet {
 		}
 		return false;
 	}
-	
+
+	//helper method to create the basic legend 
+	private void addKey() {
+		
+		fill(255, 250, 240);
+		rect(25, 50, 160, 300);
+		
+		//Eathquakes
+		fill(color(128, 43, 0));
+		rect(40,90,15,15);
+		//LifeExpectancy
+		fill(color(102, 153, 255));
+		rect(40,110,15,15);
+		
+		fill(0, 0, 0);
+		text("Earthquakes Map", 65, 95);
+		text("Life Expectancy Map", 65, 115);
+		
+		fill(0);
+		textAlign(LEFT, CENTER);
+		textSize(12);
+		text("Key", 50, 75);
+	}
+
+	//helper method to create the earthquakes legend 
+	private void addEqMapKey() {
+		fill(255, 250, 240);
+		rect(25, 50, 160, 300);
+		
+		fill(0);
+		textAlign(LEFT, CENTER);
+		textSize(12);
+		text("Earthquake Key", 50, 75);
+		
+		//LandQuake
+		fill(color(255, 255, 255));
+		ellipse(50, 95, 15, 15);
+		//OceanQuake
+		fill(color(255, 255, 255));
+		rect(43, 110, 15, 15);
+		//City
+		fill(163,136,60);
+		triangle(50,130,45,140,55,140);
+		//Light
+		fill(color(255, 255, 0));
+		ellipse(50, 175, 15, 15);
+		//Moderate
+		fill(color(0, 0, 255));
+		ellipse(50, 195, 15, 15);
+		//Intermediate
+		fill(color(0, 255, 0));
+		ellipse(50, 215, 15, 15);
+		//Deep
+		fill(color(255, 0, 0));
+		ellipse(50, 235, 15, 15);
+		//Past Day
+		fill(color(255, 255, 255));
+		ellipse(50, 255, 15, 15);
+		line(60,245,40,265);
+		line(40,245,60,265);
+		//LifeExpectancy
+		fill(color(102, 153, 255));
+		rect(40,290,15,15);
+		
+		fill(0, 0, 0);
+		text("Land quake", 75, 95);
+		text("Ocean quake", 75, 115);
+		text("Cities", 75, 135);
+		text("Shallow", 75, 175);
+		text("Moderate", 75, 195);
+		text("Intermediate", 75, 215);
+		text("Deep", 75, 235);
+		text("Past Day", 75, 255);
+		text("Life Expectancy Map", 65, 295);
+		
+		textAlign(LEFT, CENTER);
+		text("Size ~ Magnitude", 50, 155);
+	}
+
+	//helper method to create the life expectancy legend 
+	private void addLifeMapKey() {
+		fill(255, 250, 240);
+		rect(25, 50, 160, 300);
+		
+		fill(0);
+		textAlign(LEFT, CENTER);
+		textSize(12);
+		text("Life Expectancy Key", 50, 75);
+		
+		//Low
+		fill(color(255, 148, 77));
+		rect(40,90,15,15);
+		//High
+		fill(color(0, 0, 255));
+		rect(40,110,15,15);
+		//Eathquakes
+		fill(color(128, 43, 0));
+		rect(40,130,15,15);
+		
+		fill(0, 0, 0);
+		text("Low", 75, 95);
+		text("High", 75, 115);
+		text("Earthquakes Map", 65, 135);
+	}
 }

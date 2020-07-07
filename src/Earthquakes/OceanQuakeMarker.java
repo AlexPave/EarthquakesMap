@@ -1,6 +1,11 @@
 package Earthquakes;
 
+import java.util.List;
+
+import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.data.PointFeature;
+import de.fhpotsdam.unfolding.marker.Marker;
+import de.fhpotsdam.unfolding.marker.SimpleLinesMarker;
 import processing.core.PGraphics;
 
 public class OceanQuakeMarker extends EarthquakeMarker {
@@ -22,7 +27,25 @@ public class OceanQuakeMarker extends EarthquakeMarker {
 		
 	}
 	
-
+	//creates lines between the ocean quake and cities it affects
+	public List<Marker> createLines(List<Marker> cityMarkers, List<Marker> lines) {
+		List<Marker> withinThreat = this.withinThreatFromEq(cityMarkers, this);
+		for(Marker m: withinThreat) {
+			SimpleLinesMarker line = new SimpleLinesMarker(this.getLocation(),m.getLocation());
+			line.setStrokeWeight(3);
+			line.setColor(0);
+			lines.add(line);
+		}
+		return lines;
+	}
+	
+	//overrides the hideNotWithinThreat in order to put the lines to the map
+	public void hideNotWithinThreat(List<Marker> quakeMarkers, List<Marker> cityMarkers, List<Marker> lines, UnfoldingMap map) {
+		super.hideNotWithinThreat(quakeMarkers, cityMarkers, lines, map);
+		lines = this.createLines(cityMarkers, lines);
+		map.addMarkers(lines);
+	}
+	
 
 	
 
