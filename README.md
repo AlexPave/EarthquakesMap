@@ -78,3 +78,14 @@ createLines(List<Marker> cityMarkers, List<Marker> lines) # returns a list of li
 hideNotWithinThreat(List<Marker> quakeMarkers, List<Marker> cityMarkers, List<Marker> lines, UnfoldingMap map) # adds the line markers to the map
 
 ```
+
+## Guide for using the map
+
+![image](https://user-images.githubusercontent.com/67192408/87024253-8916da00-c1e1-11ea-99f1-2e3cd0460d0e.png)
+
+![image](https://user-images.githubusercontent.com/67192408/87024627-0b070300-c1e2-11ea-875f-e5b4f3cb72be.png)
+
+![image](https://user-images.githubusercontent.com/67192408/87024704-23771d80-c1e2-11ea-8022-e6dba887bd3f.png)
+
+![image](https://user-images.githubusercontent.com/67192408/87024766-37bb1a80-c1e2-11ea-91ab-64a6343c7f32.png)
+
