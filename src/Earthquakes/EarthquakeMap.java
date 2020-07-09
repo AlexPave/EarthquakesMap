@@ -185,11 +185,6 @@ public class EarthquakeMap extends PApplet {
 	@Override
 	public void mouseClicked()
 	{
-		// TODO: Implement this method
-		// Hint: You probably want a helper method or two to keep this code
-		// from getting too long/disorganized
-		
-		// clear the last selection
 		if (lastClicked != null) {
 			lastClicked.setClicked(false);
 			lastClicked = null;
