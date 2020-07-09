@@ -5,7 +5,7 @@ The map uses earthquake information from a live RSS feed  http://earthquake.usgs
 
 ##Table of contents
 
-The project contains 2 packages: Parsing (helps parse the information fom the files) and Earthquakes (the main package) which contains 6 classes.
+The project contains 2 packages: Parsing (helps parse the information fom the files) and Earthquakes (the main package) which contains 6 classes:
 
 ```python
 EarthquakeMap - creates the map and displays the markers (extends PApplet)
@@ -17,14 +17,11 @@ draw()  # displays the map and the key
 lifeExpCSVFileLoad(String fileName)  # returns a Map <String, Float> (helps in linking the country with its life expectancy value)
 shadeCountries() # sets the color to the country markers depending on the life expectancy of each country
 mouseMoved() # when the mouse lands on a city or an earthquake marker it shows info about them
-mouseClicked() # when a city marker is clicked all markers disappear except that city and the earthquake that might affect it;when a earthquake marker is clicked all markers disappear except that earhquake marker and the cities it affects; if the earthquake
-				 marker is an oceanquake marker then it links it with the cities it affects
+mouseClicked() # when a city marker is clicked all markers disappear except that city and the earthquake that might affect it;when a earthquake marker is clicked all markers disappear except that earhquake marker and the cities it affects; if the earthquake marker is an oceanquake marker then it links it with the cities it affects
 addKey(), addEqMapKey(), addLifeMapKey)() # create the key depending on which map is shown
 hideMarkers(), unhideMarkers(), hideCountryMarkers(), unhideCountryMarkers(), hideLines() #set the hidden property of certain markers to either true or false
 
-```
 
-```python
 CommonMarker - helps in creating the markers (extends SimplePointMarker)
 
 Methods:
@@ -35,8 +32,7 @@ draw(PGraphics pg, float x, float y) # displays the markers as long as they are 
 notWithinThreatFromEq(List<Marker> markers, EarthquakeMarker eqm) # returns a list of markers that are not within the threat zone of a certain earthquake
 withinThreatFromEq(List<Marker> markers, EarthquakeMarker eqm) # returns a list of markers that are within the threat zone of a certain earthquake
 
-```
-```python
+
 CityMarker - helps in creating the city markers (extends CommonMarker)
 
 Methods:
@@ -48,8 +44,7 @@ getCity() # returns the name property of the city marker as a string
 getCountry() # returns the country property of the city marker as a string 
 getPopulation() # returns the population property of the city marker as a float
 
-```
-```python
+
 EarthquakeMarker - helps in creating the earthquake markers (extends CommonMarker)
 
 Methods:
@@ -65,9 +60,7 @@ getDepth() # returns the depth property of the earthquake marker as a float
 getRadius() # returns the radius property of the earthquake marker as a float
 isOnLand() # returns the boolean value of the isOnLand variable
 
-```
 
-```python
 LandQuakeMarker - helps in creating the landquake markers (extends EarthquakeMarker)
 
 Methods:
@@ -75,9 +68,7 @@ Methods:
 drawEarthquake(PGraphics pg, float x, float y) # displays an ellipse for the earthquakes that occurred on land
 getCountry() # returns the country property of the landquake marker as a string 
 
-```
 
-```python
 OceanQuakeMarker - helps in creating the oceanquake markers (extends EarthquakeMarker)
 
 Methods:
