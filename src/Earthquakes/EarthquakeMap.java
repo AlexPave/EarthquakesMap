@@ -17,7 +17,6 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
-import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import processing.core.PApplet;
@@ -32,11 +31,11 @@ public class EarthquakeMap extends PApplet {
 	private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom";
 	
 	//files with city and country names and info
-	private String cityFile = "C:/Users/Anda/git/EarthquakesMap/data/city-data.json";
-	private String countryFile = "C:/Users/Anda/git/EarthquakesMap/data/countries.geo.json";
+	private String cityFile = "data/city-data.json";
+	private String countryFile = "data/countries.geo.json";
 	
 	//map for life expectancy (key=country, value = life expectancy value)
-	private Map<String,Float>  lifeExpByCountry = lifeExpCSVFileLoad("C:/Users/Anda/eclipse-workspace/MyPApplet/data/LifeExpectancyWorldBank.csv");
+	private Map<String,Float>  lifeExpByCountry = lifeExpCSVFileLoad("data/LifeExpectancyWorldBank.csv");
 
 	//marker lists for cities, countries, earthquakes and a helper list to create lines from an ocean quake to the city it affects
 	private List<Marker> quakeMarkers;
