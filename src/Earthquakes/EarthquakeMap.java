@@ -197,14 +197,14 @@ public class EarthquakeMap extends PApplet {
 			unhideMarkers();
 		}
 		
-		if(mouseX>40&&mouseX<65&&((mouseY>90&&mouseY<105)||(mouseY>130&&mouseY<145))) {
+		if(mouseX>30&&mouseX<180&&((mouseY>90&&mouseY<105&&lifeMap.equals("false"))||(mouseY>130&&mouseY<145))) {
 			eqMap = "true";
 			lifeMap = "false";
 			unhideMarkers();
 			hideCountryMarkers();
 		}
 		else {
-			if(mouseX>40&&mouseX<65&&((mouseY>110&&mouseY<125)||(mouseY>290&&mouseY<315))) {
+			if(mouseX>30&&mouseX<180&&((mouseY>110&&mouseY<125&&eqMap.equals("false"))||(mouseY>290&&mouseY<315))) {
 				lifeMap = "true";
 				eqMap = "false";
 				hideMarkers();
@@ -317,15 +317,15 @@ public class EarthquakeMap extends PApplet {
 		rect(25, 50, 160, 300);
 		
 		//Eathquakes
-		fill(color(128, 43, 0));
-		rect(40,90,15,15);
+		fill(color(100, 100, 100));
+		rect(30,90,150,15);
 		//LifeExpectancy
-		fill(color(102, 153, 255));
-		rect(40,110,15,15);
+		fill(color(100, 100, 100));
+		rect(30,110,150,15);
 		
-		fill(0, 0, 0);
-		text("Earthquakes Map", 65, 95);
-		text("Life Expectancy Map", 65, 115);
+		fill(250, 250, 250);
+		text("Earthquakes Map", 55, 95);
+		text("Life Expectancy Map", 55, 115);
 		
 		fill(0);
 		textAlign(LEFT, CENTER);
@@ -370,8 +370,8 @@ public class EarthquakeMap extends PApplet {
 		line(60,245,40,265);
 		line(40,245,60,265);
 		//LifeExpectancy
-		fill(color(102, 153, 255));
-		rect(40,290,15,15);
+		fill(color(100, 100, 100));
+		rect(30,290,150,15);
 		
 		fill(0, 0, 0);
 		text("Land quake", 75, 95);
@@ -382,10 +382,12 @@ public class EarthquakeMap extends PApplet {
 		text("Intermediate", 75, 215);
 		text("Deep", 75, 235);
 		text("Past Day", 75, 255);
-		text("Life Expectancy Map", 65, 295);
 		
 		textAlign(LEFT, CENTER);
 		text("Size ~ Magnitude", 50, 155);
+		
+		fill(250,250,250);
+		text("Life Expectancy Map", 55, 295);
 	}
 
 	//helper method to create the life expectancy legend 
@@ -405,12 +407,14 @@ public class EarthquakeMap extends PApplet {
 		fill(color(0, 0, 255));
 		rect(40,110,15,15);
 		//Eathquakes
-		fill(color(128, 43, 0));
-		rect(40,130,15,15);
+		fill(color(100, 100, 100));
+		rect(30,130,150,15);
 		
 		fill(0, 0, 0);
 		text("Low", 75, 95);
 		text("High", 75, 115);
-		text("Earthquakes Map", 65, 135);
+		
+		fill(250, 250, 250);
+		text("Earthquakes Map", 55, 135);
 	}
 }
