@@ -3,7 +3,7 @@
 This is a project that shows both a map with earthquakes and citites markers along with some info about them and a map of the life expectancy in each country.
 The map uses earthquake information from a live RSS feed  http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom and the life expectancy information from a file (which you will find in /EarthquakeMap/bin/data) taken from th world bank.
 
-##Table of contents
+## Table of contents
 
 The project contains 2 packages: Parsing (helps parse the information fom the files) and Earthquakes (the main package) which contains 6 classes:
 
